@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zepr.lovable.app/sitemap.xml
