@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://zepr.lovable.app/sitemap.xml
+Sitemap: https://zepr.vercel.app/sitemap.xml
