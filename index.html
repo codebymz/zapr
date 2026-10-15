@@ -1300,8 +1300,8 @@
 <!-- ═══════════════════════════════════════════
      EXTERNAL LIBRARIES (CDN)
 ═══════════════════════════════════════════ -->
-<!-- html2canvas (required by jsPDF.html) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- html2canvas-pro (supports modern CSS oklch/oklab) -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.0.1/dist/html2canvas-pro.min.js"></script>
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- PDF.js (UMD - exposes window["pdfjs-dist/build/pdf"]) -->
@@ -2321,7 +2321,7 @@ async function docxToImage(file, onProgress) {
   
   try {
     onProgress(60, "Rasterizing Image");
-    const canvas = await html2canvas(container, { scale: 2 });
+    const canvas = await html2canvas(container, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" });
     onProgress(90, "Encoding PNG");
     const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
     const name = file.name.replace(/\.docx$/i, "") + ".png";
@@ -2482,7 +2482,7 @@ async function htmlToPdf(file, onProgress) {
   
   try {
     onProgress(50, "Rendering to Canvas");
-    const canvas = await html2canvas(container, { scale: 2 });
+    const canvas = await html2canvas(container, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" });
     
     onProgress(80, "Generating PDF");
     const doc = new jsPDF({ unit: "px", format: "a4" });
