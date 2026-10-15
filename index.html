@@ -2073,12 +2073,13 @@ async function mdToDocx(file, onProgress) {
 async function pdfToPptx(file, onProgress) {
   onProgress(5, "Loading PDF");
   const pdfjsLib = getPdfjs();
-  if (!window.pptxgen) throw new Error("PptxGenJS not loaded. Please reload the page.");
+  const PptxGen = window.PptxGenJS || window.pptxgen;
+  if (!PptxGen) throw new Error("PptxGenJS not loaded. Please reload the page.");
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   
   onProgress(15, "Initializing Presentation");
-  const pres = new window.pptxgen();
+  const pres = new PptxGen();
   // Using standard 16:9 ratio, but we might tweak per-slide if we wanted
   pres.layout = "LAYOUT_16x9";
   
