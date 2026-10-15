@@ -12,7 +12,8 @@
   <meta property="og:site_name" content="Zapr" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://zepr.lovable.app/" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="canonical" href="https://zepr.vercel.app/" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -237,10 +238,39 @@
     }
 
     .tools-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
       margin-bottom: 1.5rem;
+    }
+
+    .home-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 1.5rem;
+      align-items: start;
+      margin-bottom: 1.5rem;
+    }
+
+    .tool-picker-panel {
+      margin-bottom: 0;
+    }
+
+    .upload-panel {
+      margin-bottom: 0;
+      min-height: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .home-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .tools-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .tool-btn {
@@ -254,6 +284,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      min-height: 5.25rem;
       position: relative;
       overflow: hidden;
     }
@@ -972,32 +1003,42 @@
         <p class="hero-desc">Images, PDFs, formats — switched in a blink, right inside your browser. Nothing ever touches a server.</p>
       </section>
 
-      <!-- Tool Picker -->
-      <section style="margin-bottom:1.5rem">
-        <p class="section-label">Pick a tool</p>
-        <div class="tools-grid" id="tools-grid"></div>
-      </section>
+      <div class="home-split">
+        <!-- Tool Picker -->
+        <section id="tool-picker-section" class="tool-picker-panel">
+          <div id="detected-banner" class="hidden" style="margin-bottom:1rem; padding:1rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted-foreground)">Smart Detection</div>
+              <div id="detected-type-label" style="font-weight:500">Detected: PDF document</div>
+            </div>
+            <button class="btn-outline" onclick="startOver()" style="padding:0.25rem 0.75rem; font-size:0.875rem">Start over</button>
+          </div>
+          <p class="section-label" id="tools-section-label">Pick a tool</p>
+          <div class="tools-grid" id="tools-grid"></div>
+        </section>
 
-      <!-- Drop Zone -->
-      <section
-        id="drop-zone"
-        class="drop-zone"
-        ondragover="onDragOver(event)"
-        ondragleave="onDragLeave(event)"
-        ondrop="onDrop(event)"
-        onclick="triggerFilePick()"
-      >
-        <input type="file" id="file-input" class="hidden" onchange="onFileInput(event)" />
-        <div class="drop-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-        </div>
-        <h3 class="drop-title" id="drop-title">Drop a file here</h3>
-        <p class="drop-desc" id="drop-desc">or click to browse · PDF only</p>
-        <button class="btn-primary" id="choose-btn" onclick="event.stopPropagation(); triggerFilePick()">Choose file</button>
-        <div class="file-chips hidden" id="file-chips"></div>
-      </section>
+        <!-- Drop Zone -->
+        <section
+          id="drop-zone"
+          class="drop-zone upload-panel"
+          style="margin-bottom:0"
+          ondragover="onDragOver(event)"
+          ondragleave="onDragLeave(event)"
+          ondrop="onDrop(event)"
+          onclick="triggerFilePick()"
+        >
+          <input type="file" id="file-input" class="hidden" onchange="onFileInput(event)" />
+          <div class="drop-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </div>
+          <h3 class="drop-title" id="drop-title">Drop any file to get started</h3>
+          <p class="drop-desc" id="drop-desc">or click to browse</p>
+          <button class="btn-primary" id="choose-btn" onclick="event.stopPropagation(); triggerFilePick()">Choose file</button>
+          <div class="file-chips hidden" id="file-chips"></div>
+        </section>
+      </div>
 
       <!-- Settings Panel -->
       <section id="settings-panel" class="settings-panel hidden">
@@ -1259,10 +1300,12 @@
 <!-- ═══════════════════════════════════════════
      EXTERNAL LIBRARIES (CDN)
 ═══════════════════════════════════════════ -->
+<!-- html2canvas (required by jsPDF.html) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module" id="pdfjs-script"></script>
+<!-- PDF.js (UMD - exposes window["pdfjs-dist/build/pdf"]) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js"></script>
 <!-- SheetJS (xlsx) -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <!-- docx -->
@@ -1273,6 +1316,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <!-- PptxGenJS -->
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS/dist/pptxgen.bundle.js"></script>
+<!-- Tesseract.js -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<!-- pdf-lib -->
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <script>
 /* ═══════════════════════════════════════════
@@ -1293,12 +1340,21 @@ const TOOLS = [
   { id: "image-to-png",   label: "→ PNG",              sub: "Convert any image to PNG",      accept: "image/*",                                                                                     multi: true  },
   { id: "image-to-jpg",   label: "→ JPG",              sub: "Convert any image to JPG",      accept: "image/*",                                                                                     multi: true  },
   { id: "image-to-webp",  label: "→ WEBP",             sub: "Modern lightweight format",     accept: "image/*",                                                                                     multi: true  },
+  { id: "image-to-ocr-docx", label: "Image → OCR Word", sub: "Extract text from image to DOCX", accept: "image/*",                                                                                 multi: false },
+  { id: "pdf-to-ocr-docx",   label: "PDF → OCR Word",   sub: "Scanned PDF to editable DOCX", accept: "application/pdf",                                                                             multi: false },
+  { id: "pdf-to-excel",      label: "PDF → Excel",      sub: "Extract text/tables from PDF", accept: "application/pdf",                                                                             multi: false },
+  { id: "docx-to-image",     label: "Word → Image",     sub: "Convert DOCX to PNG image",    accept: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",                     multi: false },
+  { id: "pdf-merge",         label: "PDF Merge",        sub: "Combine multiple PDFs",        accept: "application/pdf",                                                                             multi: true  },
+  { id: "pdf-split",         label: "PDF Split",        sub: "Split PDF pages or extract",   accept: "application/pdf",                                                                             multi: false },
+  { id: "pdf-compress",      label: "PDF Compress",     sub: "Reduce PDF file size",         accept: "application/pdf",                                                                             multi: false },
+  { id: "text-to-pdf",       label: "Text → PDF",       sub: "Simple text to paginated PDF", accept: "text/plain,.txt",                                                                             multi: false },
+  { id: "html-to-pdf",       label: "HTML → PDF",       sub: "Render HTML file to PDF",      accept: "text/html,.html",                                                                             multi: false },
 ];
 
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
-let activeTool    = TOOLS[0];
+let activeTool    = null; // null triggers smart auto-detect flow
 let files         = [];
 let results       = [];
 let selected      = new Set();
@@ -1307,6 +1363,19 @@ let previewFile   = null;
 let includeContent    = true;
 let maxHeadingLevel   = 3;
 let contactKind       = "bug";
+let pdfSplitMode      = "individual"; // "individual" or "range"
+let pdfSplitRange     = "1-3";
+let smartMode         = false;
+let detectedType      = null;
+let ocrWorker          = null;
+let ocrWorkerReady     = false;
+let ocrWorkerInitPromise = null;
+
+window.addEventListener("beforeunload", () => {
+  if (ocrWorker) {
+    ocrWorker.terminate().catch(() => {});
+  }
+});
 
 /* ═══════════════════════════════════════════
    TOAST
@@ -1368,9 +1437,21 @@ function showPage(name) {
 function renderTools() {
   const grid = document.getElementById("tools-grid");
   grid.innerHTML = "";
-  TOOLS.forEach(t => {
+  
+  const isValid = (tAccept, fType) => {
+    if (tAccept === fType) return true;
+    if (tAccept.includes(fType)) return true;
+    if (fType.includes(tAccept)) return true;
+    return false;
+  };
+
+  const visibleTools = smartMode && detectedType 
+    ? TOOLS.filter(t => isValid(t.accept, detectedType))
+    : TOOLS;
+
+  visibleTools.forEach(t => {
     const btn = document.createElement("button");
-    btn.className = `tool-btn${t.id === activeTool.id ? " active" : ""}`;
+    btn.className = `tool-btn${activeTool && t.id === activeTool.id ? " active" : ""}`;
     btn.id = `tool-${t.id}`;
     btn.innerHTML = `<div class="tool-label">${t.label}</div><div class="tool-sub">${t.sub}</div>`;
     btn.onclick = () => pickTool(t);
@@ -1380,9 +1461,28 @@ function renderTools() {
 
 function pickTool(tool) {
   activeTool = tool;
+  if (!smartMode) {
+    files = [];
+  }
+  results = [];
+  selected = new Set();
+  renderTools();
+  updateDropZone();
+  updateSettings();
+  updateActionBar();
+  updateResults();
+  hideError();
+}
+
+function startOver() {
+  activeTool = null;
+  smartMode = false;
+  detectedType = null;
   files = [];
   results = [];
   selected = new Set();
+  document.getElementById("detected-banner").classList.add("hidden");
+  document.getElementById("tools-section-label").textContent = "Pick a tool";
   renderTools();
   updateDropZone();
   updateSettings();
@@ -1394,6 +1494,57 @@ function pickTool(tool) {
 /* ═══════════════════════════════════════════
    FILE VALIDATION
 ═══════════════════════════════════════════ */
+async function detectFileType(file) {
+  return new Promise((resolve) => {
+    const ext = file.name.toLowerCase().split(".").pop() ?? "";
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const arr = (new Uint8Array(e.target.result)).subarray(0, 4);
+      let hex = "";
+      for (let i = 0; i < arr.length; i++) {
+        hex += arr[i].toString(16).padStart(2, '0').toUpperCase();
+      }
+      
+      let detectedExt = ext;
+      if (hex.startsWith("25504446")) detectedExt = "pdf";
+      else if (hex.startsWith("504B0304")) {
+        if (["docx", "xlsx", "pptx"].includes(ext)) detectedExt = ext;
+        else detectedExt = "docx";
+      } else if (hex.startsWith("89504E47")) detectedExt = "png";
+      else if (hex.startsWith("FFD8FF")) detectedExt = "jpg";
+      else if (hex.startsWith("52494646")) detectedExt = "webp";
+
+      if (["md", "markdown", "csv", "txt", "html"].includes(ext)) {
+         detectedExt = ext;
+      }
+
+      if (detectedExt === "pdf") resolve("application/pdf");
+      else if (detectedExt === "docx") resolve("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      else if (detectedExt === "xlsx") resolve("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      else if (detectedExt === "csv") resolve(".csv,text/csv");
+      else if (["md", "markdown"].includes(detectedExt)) resolve(".md,.markdown,text/markdown");
+      else if (detectedExt === "txt") resolve("text/plain,.txt");
+      else if (detectedExt === "html") resolve("text/html,.html");
+      else if (["png", "jpg", "jpeg", "webp"].includes(detectedExt)) resolve("image/*");
+      else resolve("unknown");
+    };
+    reader.onerror = () => resolve("unknown");
+    reader.readAsArrayBuffer(file.slice(0, 4));
+  });
+}
+
+function getFriendlyName(accept) {
+  if (accept === "application/pdf") return "PDF document";
+  if (accept === "image/*") return "Image file";
+  if (accept.includes("wordprocessingml")) return "Word document";
+  if (accept.includes("spreadsheetml")) return "Excel spreadsheet";
+  if (accept.includes("csv")) return "CSV file";
+  if (accept.includes("markdown")) return "Markdown file";
+  if (accept.includes("text/plain")) return "Text file";
+  if (accept.includes("text/html")) return "HTML file";
+  return "file";
+}
+
 function validateFile(file, accept) {
   if (accept === "image/*" || accept.startsWith("image/")) {
     if (!file.type.startsWith("image/")) return `"${file.name}" is not an image`;
@@ -1417,6 +1568,20 @@ function updateDropZone() {
   const descEl  = document.getElementById("drop-desc");
   const chooseBtn = document.getElementById("choose-btn");
   const input = document.getElementById("file-input");
+
+  if (!t) {
+    titleEl.textContent = "Drop any file to get started";
+    chooseBtn.textContent = "Choose file";
+    input.multiple = false;
+    input.accept = "*/*";
+    descEl.textContent = "or click to browse";
+    if (smartMode) {
+      titleEl.textContent = "File selected";
+      descEl.textContent = "Pick a conversion below";
+    }
+    renderFileChips();
+    return;
+  }
 
   titleEl.textContent = `Drop ${t.multi ? "files" : "a file"} here`;
   chooseBtn.textContent = `Choose ${t.multi ? "files" : "file"}`;
@@ -1487,14 +1652,14 @@ function renderFileChips() {
 /* ═══════════════════════════════════════════
    SETTINGS PANEL
 ═══════════════════════════════════════════ */
-const SHOW_SETTINGS_FOR = ["docx-to-xlsx", "xlsx-to-docx"];
+const SHOW_SETTINGS_FOR = ["docx-to-xlsx", "xlsx-to-docx", "pdf-split"];
 
 function updateSettings() {
   const panel = document.getElementById("settings-panel");
   const grid  = document.getElementById("settings-grid");
   const badge = document.getElementById("settings-badge-label");
 
-  if (!SHOW_SETTINGS_FOR.includes(activeTool.id)) {
+  if (!activeTool || !SHOW_SETTINGS_FOR.includes(activeTool.id)) {
     panel.classList.add("hidden");
     return;
   }
@@ -1502,6 +1667,25 @@ function updateSettings() {
   panel.classList.remove("hidden");
   badge.textContent = activeTool.label;
   grid.innerHTML = "";
+
+  if (activeTool.id === "pdf-split") {
+    const card = document.createElement("div");
+    card.className = "setting-card";
+    card.innerHTML = `
+      <div class="setting-title" style="margin-bottom:0.5rem">Split Mode</div>
+      <div class="heading-btns" style="margin-bottom:1rem">
+        <button class="h-btn ${pdfSplitMode === "individual" ? "active" : ""}" onclick="setPdfSplitMode('individual')">Individual Pages</button>
+        <button class="h-btn ${pdfSplitMode === "range" ? "active" : ""}" onclick="setPdfSplitMode('range')">Extract Range</button>
+      </div>
+      ${pdfSplitMode === "range" ? `
+      <div class="setting-title" style="margin-bottom:0.25rem">Page Range</div>
+      <input type="text" class="form-input" style="padding:0.25rem 0.5rem;font-size:0.75rem;margin-bottom:0.5rem" value="${pdfSplitRange}" onchange="pdfSplitRange = this.value" placeholder="e.g. 1-3,5" />
+      <div class="setting-desc">Enter pages or ranges separated by commas.</div>
+      ` : `<div class="setting-desc">Extracts every page as a separate PDF file.</div>`}
+    `;
+    grid.appendChild(card);
+    return;
+  }
 
   // Checkbox (docx-to-xlsx only)
   if (activeTool.id === "docx-to-xlsx") {
@@ -1541,6 +1725,11 @@ function setHeadingLevel(lv) {
   updateSettings();
 }
 
+function setPdfSplitMode(mode) {
+  pdfSplitMode = mode;
+  updateSettings();
+}
+
 /* ═══════════════════════════════════════════
    ACTION BAR
 ═══════════════════════════════════════════ */
@@ -1549,7 +1738,8 @@ function updateActionBar() {
   if (!files.length) { bar.classList.add("hidden"); return; }
   bar.classList.remove("hidden");
   document.getElementById("action-file-count").textContent = files.length;
-  document.getElementById("action-label").textContent = ` file${files.length > 1 ? "s" : ""} ready · ${activeTool.label}`;
+  const label = activeTool ? activeTool.label : "Smart Detection";
+  document.getElementById("action-label").textContent = ` file${files.length > 1 ? "s" : ""} ready · ${label}`;
 }
 
 /* ═══════════════════════════════════════════
@@ -1625,7 +1815,7 @@ async function imagesToPdf(files) {
 async function pdfToImages(file) {
   const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
   if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   const results = [];
@@ -1680,7 +1870,7 @@ async function pdfToDocx(file, onProgress) {
   onProgress(5, "Loading PDF");
   const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
   if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
   const { Document, Packer, Paragraph, TextRun, PageBreak } = window.docx;
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
@@ -1783,7 +1973,7 @@ async function pdfToText(file, onProgress) {
   onProgress(5, "Loading PDF");
   const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
   if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   const out = [];
@@ -1883,7 +2073,7 @@ async function pdfToPptx(file, onProgress) {
   if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
   if (!window.pptxgen) throw new Error("PptxGenJS not loaded. Please reload the page.");
   
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   
@@ -1918,6 +2108,400 @@ async function pdfToPptx(file, onProgress) {
   return { name, blob, url: URL.createObjectURL(blob) };
 }
 
+async function ensureOcrWorker(onProgress) {
+  if (!window.Tesseract) throw new Error("Tesseract.js could not be loaded. Please reload the page and try again.");
+
+  if (ocrWorker && ocrWorkerReady) return ocrWorker;
+  if (ocrWorkerInitPromise) return ocrWorkerInitPromise;
+
+  ocrWorkerInitPromise = (async () => {
+    const worker = await window.Tesseract.createWorker({
+      workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js",
+      corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.4/tesseract-core.wasm.js",
+      langPath: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/lang/",
+      logger: m => {
+        if (!m || typeof m.progress !== "number") return;
+        const status = (m.status || "").toLowerCase();
+        let pct = 8;
+        let label = "Preparing OCR…";
+
+        if (status.includes("loading tesseract core")) {
+          pct = 8;
+          label = "Loading OCR engine…";
+        } else if (status.includes("loading language traineddata")) {
+          pct = 20;
+          label = "Loading language data…";
+        } else if (status.includes("initializing api")) {
+          pct = 35;
+          label = "Initializing OCR engine…";
+        } else if (status.includes("recognizing text")) {
+          pct = 40 + Math.round(m.progress * 50);
+          label = m.progress >= 0.01 ? `Recognizing text… ${Math.round(m.progress * 100)}%` : "Recognizing text…";
+        }
+
+        onProgress(Math.min(95, pct), label);
+      }
+    });
+
+    await worker.loadLanguage("eng");
+    await worker.initialize("eng");
+    ocrWorker = worker;
+    ocrWorkerReady = true;
+    return worker;
+  })().catch(err => {
+    ocrWorker = null;
+    ocrWorkerReady = false;
+    ocrWorkerInitPromise = null;
+    throw err;
+  });
+
+  return ocrWorkerInitPromise;
+}
+
+async function prepareImageForOcr(file) {
+  const sourceUrl = URL.createObjectURL(file);
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Unable to read the selected image."));
+    image.src = sourceUrl;
+  });
+
+  const largestDim = Math.max(img.width, img.height);
+  if (largestDim <= 2000) {
+    return { url: sourceUrl, resized: false, width: img.width, height: img.height };
+  }
+
+  const scale = 2000 / largestDim;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(img.width * scale));
+  canvas.height = Math.max(1, Math.round(img.height * scale));
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((result) => {
+      if (result) resolve(result);
+      else reject(new Error("Unable to process the image for OCR."));
+    }, file.type || "image/png", 0.92);
+  });
+
+  const resizedUrl = URL.createObjectURL(blob);
+  return { url: resizedUrl, resized: true, width: canvas.width, height: canvas.height };
+}
+
+async function imageToOcrDocx(file, onProgress) {
+  const { Document, Packer, Paragraph, TextRun } = window.docx;
+  const worker = await ensureOcrWorker(onProgress);
+
+  const { url, resized } = await prepareImageForOcr(file);
+  onProgress(resized ? 45 : 25, resized ? "Resized image for faster OCR" : "Preparing image for OCR");
+
+  const timeoutMs = 60000;
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error("OCR is taking longer than expected — try a smaller or clearer image")), timeoutMs);
+  });
+
+  let text = "";
+  try {
+    const resultPromise = worker.recognize(url);
+    const { data: { text: recognizedText } } = await Promise.race([resultPromise, timeoutPromise]);
+    text = recognizedText || "";
+  } catch (err) {
+    if (ocrWorker && ocrWorkerReady) {
+      try { await ocrWorker.terminate(); } catch (_) {}
+    }
+    ocrWorker = null;
+    ocrWorkerReady = false;
+    ocrWorkerInitPromise = null;
+    throw err;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+
+  onProgress(95, "Building DOCX");
+  const paragraphs = text.split(/\r?\n/).map(line => new Paragraph({ children: [new TextRun(line)] }));
+  const doc = new Document({ sections: [{ children: paragraphs }] });
+  const blob = await Packer.toBlob(doc);
+  const name = file.name.replace(/\.[^.]+$/, "") + "_ocr.docx";
+  onProgress(100, "Done");
+  return { name, blob, url: URL.createObjectURL(blob) };
+}
+
+async function pdfToOcrDocx(file, onProgress) {
+  if (!window.Tesseract) throw new Error("Tesseract.js not loaded.");
+  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+  const { Document, Packer, Paragraph, TextRun, PageBreak } = window.docx;
+
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  
+  const worker = await Tesseract.createWorker();
+  await worker.loadLanguage('eng');
+  await worker.initialize('eng');
+
+  const children = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    onProgress(10 + Math.round(((i - 1) / pdf.numPages) * 80), `OCR Page ${i}/${pdf.numPages}`);
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 2 });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport, canvas }).promise;
+    
+    const { data: { text } } = await worker.recognize(canvas);
+    
+    const lines = text.split(/\r?\n/);
+    lines.forEach(line => children.push(new Paragraph({ children: [new TextRun(line)] })));
+    
+    if (i < pdf.numPages) children.push(new Paragraph({ children: [new PageBreak()] }));
+  }
+  
+  await worker.terminate();
+  
+  onProgress(95, "Building DOCX");
+  const doc = new Document({ sections: [{ children }] });
+  const blob = await Packer.toBlob(doc);
+  const name = file.name.replace(/\.pdf$/i, "") + "_ocr.docx";
+  onProgress(100, "Done");
+  return { name, blob, url: URL.createObjectURL(blob) };
+}
+
+async function pdfToExcel(file, onProgress) {
+  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  
+  const wb = XLSX.utils.book_new();
+  
+  for (let i = 1; i <= pdf.numPages; i++) {
+    onProgress(10 + Math.round((i / pdf.numPages) * 80), `Processing Page ${i}/${pdf.numPages}`);
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    
+    const rowsMap = new Map();
+    for (const item of content.items) {
+      const y = Math.round(item.transform[5] / 2) * 2;
+      if (!rowsMap.has(y)) rowsMap.set(y, []);
+      rowsMap.get(y).push(item);
+    }
+    
+    const sortedY = [...rowsMap.keys()].sort((a, b) => b - a);
+    const sheetData = [];
+    
+    for (const y of sortedY) {
+      const rowItems = rowsMap.get(y);
+      rowItems.sort((a, b) => a.transform[4] - b.transform[4]);
+      sheetData.push(rowItems.map(item => item.str.trim()));
+    }
+    
+    const ws = XLSX.utils.aoa_to_sheet(sheetData.length ? sheetData : [["(empty page)"]]);
+    XLSX.utils.book_append_sheet(wb, ws, `Page ${i}`);
+  }
+  
+  onProgress(95, "Building XLSX");
+  const arrayBuffer = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+  const blob = new Blob([arrayBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const name = file.name.replace(/\.pdf$/i, "") + ".xlsx";
+  onProgress(100, "Done");
+  return { name, blob, url: URL.createObjectURL(blob) };
+}
+
+async function docxToImage(file, onProgress) {
+  if (!window.html2canvas) throw new Error("html2canvas not loaded.");
+  onProgress(10, "Reading DOCX");
+  const buf = await file.arrayBuffer();
+  const { value: html } = await mammoth.convertToHtml({ arrayBuffer: buf });
+  
+  onProgress(40, "Rendering to DOM");
+  const container = document.createElement("div");
+  container.style.cssText = "position:absolute;left:-10000px;top:0;width:794px;padding:48px;background:#fff;color:#000;font-family:Arial,sans-serif;font-size:12pt;line-height:1.5;";
+  container.innerHTML = html || "<p></p>";
+  document.body.appendChild(container);
+  
+  try {
+    onProgress(60, "Rasterizing Image");
+    const canvas = await html2canvas(container, { scale: 2 });
+    onProgress(90, "Encoding PNG");
+    const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+    const name = file.name.replace(/\.docx$/i, "") + ".png";
+    onProgress(100, "Done");
+    return { name, blob, url: URL.createObjectURL(blob) };
+  } finally {
+    container.remove();
+  }
+}
+
+async function mergePdf(files, onProgress) {
+  if (!window.PDFLib) throw new Error("pdf-lib not loaded.");
+  onProgress(10, "Initializing PDF");
+  const { PDFDocument } = window.PDFLib;
+  const mergedPdf = await PDFDocument.create();
+  
+  for (let i = 0; i < files.length; i++) {
+    onProgress(10 + Math.round((i / files.length) * 70), `Merging file ${i + 1}/${files.length}`);
+    const buf = await files[i].arrayBuffer();
+    const pdf = await PDFDocument.load(buf);
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    copiedPages.forEach(page => mergedPdf.addPage(page));
+  }
+  
+  onProgress(85, "Saving PDF");
+  const pdfBytes = await mergedPdf.save();
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const name = "merged.pdf";
+  onProgress(100, "Done");
+  return { name, blob, url: URL.createObjectURL(blob) };
+}
+
+async function splitPdf(file, onProgress, settings) {
+  if (!window.PDFLib) throw new Error("pdf-lib not loaded.");
+  const { PDFDocument } = window.PDFLib;
+  
+  onProgress(20, "Loading PDF");
+  const buf = await file.arrayBuffer();
+  const pdf = await PDFDocument.load(buf);
+  const totalPages = pdf.getPageCount();
+  
+  if (settings.mode === "individual") {
+    const results = [];
+    for (let i = 0; i < totalPages; i++) {
+      onProgress(30 + Math.round((i / totalPages) * 60), `Extracting page ${i + 1}`);
+      const newPdf = await PDFDocument.create();
+      const [copiedPage] = await newPdf.copyPages(pdf, [i]);
+      newPdf.addPage(copiedPage);
+      const pdfBytes = await newPdf.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      results.push({ name: `page-${i + 1}.pdf`, blob, url: URL.createObjectURL(blob) });
+    }
+    onProgress(100, "Done");
+    return results;
+  } else {
+    onProgress(40, "Parsing Range");
+    const indices = new Set();
+    const parts = settings.range.split(",");
+    for (const p of parts) {
+      if (p.includes("-")) {
+        let [s, e] = p.split("-").map(n => parseInt(n.trim(), 10) - 1);
+        if (!isNaN(s) && !isNaN(e)) {
+          for (let i = Math.max(0, s); i <= Math.min(e, totalPages - 1); i++) indices.add(i);
+        }
+      } else {
+        let val = parseInt(p.trim(), 10) - 1;
+        if (!isNaN(val) && val >= 0 && val < totalPages) indices.add(val);
+      }
+    }
+    
+    if (indices.size === 0) throw new Error("Invalid or out-of-bounds page range.");
+    
+    onProgress(60, "Extracting pages");
+    const newPdf = await PDFDocument.create();
+    const sortedIndices = [...indices].sort((a, b) => a - b);
+    const copiedPages = await newPdf.copyPages(pdf, sortedIndices);
+    copiedPages.forEach(page => newPdf.addPage(page));
+    
+    onProgress(90, "Saving PDF");
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const name = file.name.replace(/\.pdf$/i, "") + "_extracted.pdf";
+    onProgress(100, "Done");
+    return [{ name, blob, url: URL.createObjectURL(blob) }];
+  }
+}
+
+async function compressPdf(file, onProgress) {
+  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+  const { jsPDF } = window.jspdf;
+  
+  onProgress(10, "Loading PDF");
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  
+  for (let i = 1; i <= pdf.numPages; i++) {
+    onProgress(20 + Math.round((i / pdf.numPages) * 70), `Compressing page ${i}/${pdf.numPages}`);
+    if (i > 1) doc.addPage();
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1.0 }); 
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport, canvas }).promise;
+    
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    doc.addImage(canvas.toDataURL("image/jpeg", 0.6), "JPEG", 0, 0, pageW, pageH);
+  }
+  
+  onProgress(95, "Saving PDF");
+  const blob = doc.output("blob");
+  const name = file.name.replace(/\.pdf$/i, "") + "_compressed.pdf";
+  onProgress(100, "Done");
+  return { name, blob, url: URL.createObjectURL(blob) };
+}
+
+async function textToPdf(file, onProgress) {
+  const { jsPDF } = window.jspdf;
+  onProgress(20, "Reading Text");
+  const text = await file.text();
+  
+  onProgress(50, "Generating PDF");
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  doc.setFont("courier", "normal");
+  doc.setFontSize(10);
+  
+  const lines = doc.splitTextToSize(text, doc.internal.pageSize.getWidth() - 80);
+  let y = 40;
+  const pageH = doc.internal.pageSize.getHeight();
+  
+  for (let i = 0; i < lines.length; i++) {
+    if (y + 12 > pageH - 40) {
+      doc.addPage();
+      y = 40;
+    }
+    doc.text(lines[i], 40, y);
+    y += 12;
+  }
+  
+  const blob = doc.output("blob");
+  const name = file.name.replace(/\.txt$/i, "") + ".pdf";
+  onProgress(100, "Done");
+  return { name, blob, url: URL.createObjectURL(blob) };
+}
+
+async function htmlToPdf(file, onProgress) {
+  if (!window.html2canvas) throw new Error("html2canvas not loaded.");
+  const { jsPDF } = window.jspdf;
+  onProgress(20, "Reading HTML");
+  const html = await file.text();
+  
+  const container = document.createElement("div");
+  container.style.cssText = "position:absolute;left:-10000px;top:0;width:794px;background:#fff;color:#000;";
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  
+  try {
+    onProgress(50, "Rendering to Canvas");
+    const canvas = await html2canvas(container, { scale: 2 });
+    
+    onProgress(80, "Generating PDF");
+    const doc = new jsPDF({ unit: "px", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    
+    const imgRatio = canvas.height / canvas.width;
+    const renderH = pageW * imgRatio;
+    
+    doc.addImage(canvas.toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, pageW, renderH);
+    
+    const blob = doc.output("blob");
+    const name = file.name.replace(/\.html?$/i, "") + ".pdf";
+    onProgress(100, "Done");
+    return { name, blob, url: URL.createObjectURL(blob) };
+  } finally {
+    container.remove();
+  }
+}
+
 /* ═══════════════════════════════════════════
    MAIN CONVERSION RUNNER
 ═══════════════════════════════════════════ */
@@ -1950,6 +2534,15 @@ async function runConversion() {
     else if (id === "xlsx-to-csv")    { out = [await xlsxToCsv(files[0], onProgress)]; }
     else if (id === "csv-to-xlsx")    { out = [await csvToXlsx(files[0], onProgress)]; }
     else if (id === "md-to-docx")     { out = [await mdToDocx(files[0], onProgress)]; }
+    else if (id === "image-to-ocr-docx") { out = [await imageToOcrDocx(files[0], onProgress)]; }
+    else if (id === "pdf-to-ocr-docx")   { out = [await pdfToOcrDocx(files[0], onProgress)]; }
+    else if (id === "pdf-to-excel")      { out = [await pdfToExcel(files[0], onProgress)]; }
+    else if (id === "docx-to-image")     { out = [await docxToImage(files[0], onProgress)]; }
+    else if (id === "pdf-merge")         { out = [await mergePdf(files, onProgress)]; }
+    else if (id === "pdf-split")         { out = await splitPdf(files[0], onProgress, { mode: pdfSplitMode, range: pdfSplitRange }); }
+    else if (id === "pdf-compress")      { out = [await compressPdf(files[0], onProgress)]; }
+    else if (id === "text-to-pdf")       { out = [await textToPdf(files[0], onProgress)]; }
+    else if (id === "html-to-pdf")       { out = [await htmlToPdf(files[0], onProgress)]; }
     else {
       const fmt = id === "image-to-jpg" ? "jpg" : id === "image-to-png" ? "png" : "webp";
       onProgress(20, "Re-encoding");
