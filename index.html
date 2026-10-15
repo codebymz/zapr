@@ -1304,8 +1304,8 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.0.1/dist/html2canvas-pro.min.js"></script>
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- PDF.js (UMD - exposes window["pdfjs-dist/build/pdf"]) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js"></script>
+<!-- PDF.js (UMD - exposes window["pdfjs-dist/build/pdf"] or window.pdfjsLib) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <!-- SheetJS (xlsx) -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <!-- docx -->
@@ -1812,10 +1812,17 @@ async function imagesToPdf(files) {
   return { name: "converted.pdf", blob, url: URL.createObjectURL(blob) };
 }
 
+function getPdfjs() {
+  const lib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+  if (!lib) throw new Error("PDF.js not loaded. Please reload the page.");
+  if (!lib.GlobalWorkerOptions.workerSrc) {
+    lib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+  return lib;
+}
+
 async function pdfToImages(file) {
-  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
-  if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
+  const pdfjsLib = getPdfjs();
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   const results = [];
@@ -1868,9 +1875,7 @@ async function docxToPdf(file, onProgress) {
 
 async function pdfToDocx(file, onProgress) {
   onProgress(5, "Loading PDF");
-  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
-  if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
+  const pdfjsLib = getPdfjs();
   const { Document, Packer, Paragraph, TextRun, PageBreak } = window.docx;
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
@@ -1971,9 +1976,7 @@ async function xlsxToDocx(file, onProgress, settings = {}) {
 
 async function pdfToText(file, onProgress) {
   onProgress(5, "Loading PDF");
-  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
-  if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
+  const pdfjsLib = getPdfjs();
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   const out = [];
@@ -2069,11 +2072,8 @@ async function mdToDocx(file, onProgress) {
 
 async function pdfToPptx(file, onProgress) {
   onProgress(5, "Loading PDF");
-  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
-  if (!pdfjsLib) throw new Error("PDF.js not loaded. Please reload the page.");
+  const pdfjsLib = getPdfjs();
   if (!window.pptxgen) throw new Error("PptxGenJS not loaded. Please reload the page.");
-  
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   
@@ -2230,7 +2230,7 @@ async function imageToOcrDocx(file, onProgress) {
 
 async function pdfToOcrDocx(file, onProgress) {
   if (!window.Tesseract) throw new Error("Tesseract.js not loaded.");
-  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+  const pdfjsLib = getPdfjs();
   const { Document, Packer, Paragraph, TextRun, PageBreak } = window.docx;
 
   const buf = await file.arrayBuffer();
@@ -2268,7 +2268,7 @@ async function pdfToOcrDocx(file, onProgress) {
 }
 
 async function pdfToExcel(file, onProgress) {
-  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+  const pdfjsLib = getPdfjs();
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
   
@@ -2410,7 +2410,7 @@ async function splitPdf(file, onProgress, settings) {
 }
 
 async function compressPdf(file, onProgress) {
-  const pdfjsLib = window["pdfjs-dist/build/pdf"] || window.pdfjsLib;
+  const pdfjsLib = getPdfjs();
   const { jsPDF } = window.jspdf;
   
   onProgress(10, "Loading PDF");
