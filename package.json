@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "serve .",
-    "start": "serve ."
+    "start": "serve .",
+    "build": "mkdir -p public/css && cp index.html favicon.svg robots.txt sitemap.xml public/ && cp -r css/* public/css/ 2>/dev/null || true"
   },
   "keywords": [
     "file-converter",
