@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://zepr.vercel.app/sitemap.xml
+Sitemap: https://zapr-converter.vercel.app/sitemap.xml
